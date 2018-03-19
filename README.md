@@ -1,7 +1,7 @@
-# PREDEM C SDK
+# PANDORA C SDK
 
-[![Build Status](https://travis-ci.org/pre-dem/pre-dem-c.svg?branch=master)](https://travis-ci.org/pre-dem/pre-dem-c)
-[![codecov](https://codecov.io/gh/pre-dem/pre-dem-c/branch/master/graph/badge.svg)](https://codecov.io/gh/pre-dem/pre-dem-c)
+[![Build Status](https://travis-ci.org/qiniu/pandora-c-sdk.svg?branch=master)](https://travis-ci.org/qiniu/pandora-c-sdk)
+[![codecov](https://codecov.io/gh/qiniu/pandora-c-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/qiniu/pandora-c-sdk)
 
 ## 简介
-* 支持用自定义事件上报数据
+* Pandora上报数据
