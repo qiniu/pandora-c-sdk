@@ -1,2 +1,7 @@
-# pandora-c-sdk
-Pandora C SDK 多种方式灵活接入Pandora 大数据平台 https://pandora-docs.qiniu.com
+# PREDEM C SDK
+
+[![Build Status](https://travis-ci.org/pre-dem/pre-dem-c.svg?branch=master)](https://travis-ci.org/pre-dem/pre-dem-c)
+[![codecov](https://codecov.io/gh/pre-dem/pre-dem-c/branch/master/graph/badge.svg)](https://codecov.io/gh/pre-dem/pre-dem-c)
+
+## 简介
+* 支持用自定义事件上报数据
