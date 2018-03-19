@@ -4,4 +4,4 @@
 [![codecov](https://codecov.io/gh/qiniu/pandora-c-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/qiniu/pandora-c-sdk)
 
 ## 简介
-* Pandora上报数据
+* Pandora上报数据, 使用Curl
