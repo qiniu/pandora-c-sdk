@@ -56,3 +56,6 @@ build/
 .DS_Store
 
 .xmake/
+
+gcc_has_flags.gcno
+coverage.info
