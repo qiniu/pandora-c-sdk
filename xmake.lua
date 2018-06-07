@@ -12,6 +12,12 @@ set_warnings("all", "error")
 -- set language: c99
 set_languages("c99")
 
+
+-- set the object files directory
+set_objectdir("$(buildir)/$(mode)/$(arch)/.objs")
+set_targetdir("$(buildir)/$(mode)/$(arch)")
+
+
 -- the debug or check or coverage mode
 if is_mode("debug", "check", "coverage") then
 
