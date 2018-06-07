@@ -12,7 +12,9 @@ typedef enum {
   PANDORA_CURL_OK = 0,            /* 正常 */
   PANDORA_CURL_NOT_INIT = -1,     /* 没有调用 init 函数 */
   PANDORA_CURL_INVALID_DATA = -2, /* 传入错误的数据*/
-  PANDORA_CURL_NO_MEMORY = -3     /* 内存不足 */
+  PANDORA_CURL_NO_MEMORY = -3,    /* 内存不足 */
+  PANDORA_CURL_NO_FILE = -4,      /* 没有此文件 */
+  PANDORA_CURL_CODE_DEFAULT = -5  /* statuscode default */
 } PANDORA_CURL_CODE;
 
 typedef struct PANDORA_Points {
@@ -57,6 +59,18 @@ return: PANDORA_CURL_CODE 和 CURL error code
 
 PANDORA_CURL_CODE PANDORA_curl_send(const char *repo, const char *token,
                                     PANDORA_Points *points);
+
+/*
+发送数据到服务端
+repo: repo名称, 不能为NULL
+token: 上报的token, 不能为NULL
+file_path: 要上传的小文件，不能大于2M
+
+return: PANDORA_CURL_CODE 和 CURL error code
+*/
+
+PANDORA_CURL_CODE PANDORA_curl_send_file(const char *repo, const char *token,
+                                         const char *file_path);
 
 #ifdef __cplusplus
 }

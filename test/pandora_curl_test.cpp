@@ -17,7 +17,7 @@ TEST_GROUP(PANDORACURL){
         curl_global_cleanup();
     }};
 
-TEST(PANDORACURL, connect) {
+TEST(PANDORACURL, pandora_point) {
     PANDORA_Points* points = pandora_points_new();
     pandora_points_add_long(points, "ll", 999988887L);
 
@@ -43,9 +43,19 @@ TEST(PANDORACURL, connect) {
 
     pandora_points_newline(points);
 
-    PANDORA_curl_send("csdk", 
-        "Pandora zIV2FhwbOS0wKj3K1TmMRWOgyDSx6uTmMwu3mIRL:-wRHpm51fM4hVOcetlDBtTMti0o=:eyJyZXNvdXJjZSI6Ii92Mi9yZXBvcy9jc2RrL2RhdGEiLCJleHBpcmVzIjoxNTI3NDY1MDYwLCJjb250ZW50TUQ1IjoiIiwiY29udGVudFR5cGUiOiJ0ZXh0L3BsYWluIiwiaGVhZGVycyI6IiIsIm1ldGhvZCI6IlBPU1QifQ==", 
+    PANDORA_CURL_CODE c = PANDORA_curl_send("csdk", 
+        "Pandora 0knikszBTnSnfqhcWLw1yvunjhqweRYSV2GlLbrP:C2F02gMNJ3f_xfOKCnidfTIAngk=:eyJyZXNvdXJjZSI6Ii92Mi9yZXBvcy9jc2RrL2RhdGEiLCJleHBpcmVzIjo0NjgxOTQxNDk0LCJjb250ZW50TUQ1IjoiIiwiY29udGVudFR5cGUiOiJ0ZXh0L3BsYWluIiwiaGVhZGVycyI6IiIsIm1ldGhvZCI6IlBPU1QifQ==", 
         points);
 
     pandora_points_delete(points);
+
+    LONGS_EQUAL(PANDORA_CURL_OK, c);
+}
+
+TEST(PANDORACURL, pandora_file) {
+    PANDORA_CURL_CODE c = PANDORA_curl_send_file("syslog", 
+        "Pandora 0knikszBTnSnfqhcWLw1yvunjhqweRYSV2GlLbrP:_WQP2SeErz10br9Q5tCzyEN1qHQ=:eyJyZXNvdXJjZSI6Ii92Mi9yZXBvcy9zeXNsb2cvZGF0YSIsImV4cGlyZXMiOjQ2ODE5NDE1NDYsImNvbnRlbnRNRDUiOiIiLCJjb250ZW50VHlwZSI6InRleHQvcGxhaW4iLCJoZWFkZXJzIjoiIiwibWV0aG9kIjoiUE9TVCJ9", 
+        "./x.log");
+
+    LONGS_EQUAL(PANDORA_CURL_OK, c);
 }

@@ -8,7 +8,7 @@
 
 static char* g_domain="http://pipeline.qiniu.com";
 
-#define SDK_VERSION "0.0.1"
+#define SDK_VERSION "0.0.2"
 
 static const char* g_UA = "PANDORA-C/"SDK_VERSION;
 
@@ -140,6 +140,7 @@ PANDORA_CURL_CODE PANDORA_curl_send(const char *repo,
     struct curl_slist *list = NULL;
     char url_buff[512];
     char token_buff[512];
+    long retcode = PANDORA_CURL_CODE_DEFAULT;
 
     if (repo == NULL || token == NULL || points == NULL) {
         return PANDORA_CURL_INVALID_DATA;
@@ -173,15 +174,119 @@ PANDORA_CURL_CODE PANDORA_curl_send(const char *repo,
 
     res = curl_easy_perform(curl);
 
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE , &retcode);
+
     curl_easy_cleanup(curl);
 
     curl_slist_free_all(list);
-
  
     if(res != CURLE_OK) {
         return (PANDORA_CURL_CODE)res;
+    }
+    if (retcode != 200) {
+        return retcode;
     }
 
     return PANDORA_CURL_OK;
 }
 
+static PANDORA_CURL_CODE read_file(const char* file_path, char** buffer, int* buffer_len) {
+    FILE *fp;
+    int flen;
+    char *p;
+
+    if((fp = fopen(file_path,"r"))==NULL) {
+        return PANDORA_CURL_NO_FILE;
+    }
+    fseek(fp, 0L, SEEK_END);
+    flen=ftell(fp);
+    p=(char *)malloc(flen);
+    if(p == NULL) {
+        fclose(fp);
+        return PANDORA_CURL_NO_MEMORY;
+    }
+    fseek(fp, 0L, SEEK_SET);
+    fread(p, flen, 1, fp);
+    fclose(fp);
+    *buffer = p;
+    *buffer_len = flen;
+    return PANDORA_CURL_OK;
+}
+
+/*
+发送数据到服务端
+repo: repo名称, 不能为NULL
+token: 上报的token, 不能为NULL
+file_path: 要上传的小文件，不能大于2M
+
+return: PANDORA_CURL_CODE 和 CURL error code
+*/
+
+PANDORA_CURL_CODE PANDORA_curl_send_file(const char *repo,
+                                        const char *token,
+                                        const char* file_path) {
+    CURL *curl;
+    CURLcode res;
+    struct curl_slist *list = NULL;
+    char url_buff[512];
+    char token_buff[512];
+    PANDORA_CURL_CODE file_status = 0;
+    long retcode = PANDORA_CURL_CODE_DEFAULT;
+
+    char* file_buffer = NULL;
+    int buffer_len = 0;
+
+    if (repo == NULL || token == NULL || file_path == NULL) {
+        return PANDORA_CURL_INVALID_DATA;
+    }
+
+    /* get a curl handle */ 
+    curl = curl_easy_init();
+    if (curl == NULL ) {
+        return PANDORA_CURL_NO_MEMORY;
+    }
+
+
+    file_status = read_file(file_path, &file_buffer, &buffer_len);
+    if (file_status != PANDORA_CURL_OK) {
+        curl_easy_cleanup(curl);
+        return file_status;
+    }
+
+    memset(url_buff, 0, sizeof(url_buff));
+
+    snprintf(url_buff, sizeof(url_buff), "%s/v2/repos/%s/data", g_domain, repo);
+
+    curl_easy_setopt(curl, CURLOPT_URL, url_buff);
+
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, g_UA);
+
+    list = curl_slist_append(list, "Content-Type: text/plain");
+    snprintf(token_buff, sizeof(token_buff), "Authorization: %s", token);
+    list = curl_slist_append(list, token_buff);
+ 
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buffer_len);
+
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, file_buffer);
+
+    res = curl_easy_perform(curl);
+
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE , &retcode);
+
+    curl_easy_cleanup(curl);
+
+    curl_slist_free_all(list);
+    free(file_buffer);
+
+    if(res != CURLE_OK) {
+        return (PANDORA_CURL_CODE)res;
+    }
+
+    if (retcode != 200) {
+        return retcode;
+    }
+
+    return PANDORA_CURL_OK;
+}

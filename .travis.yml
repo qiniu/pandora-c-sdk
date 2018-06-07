@@ -29,7 +29,7 @@ before_script:
 script:
   - xmake f -m coverage
   - xmake
-  - valgrind -v --suppressions=./valgrind.suppressions --run-libc-freeres=no --error-exitcode=42 ./build/run_all_tests
+  - valgrind -v --suppressions=./valgrind.suppressions --run-libc-freeres=no --error-exitcode=42 build/run_all_tests
 
 after_success:
     # Creating report
