@@ -2,7 +2,7 @@
 set_project("pandora-curl")
 
 -- version
-set_version("0.0.1")
+set_version("0.0.2")
 
 cpputest_home = "/usr/local/"
 

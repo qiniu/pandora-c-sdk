@@ -8,10 +8,7 @@ compiler:
   - gcc
 
 install:
-  - git clone --branch=dev https://github.com/waruqi/xmake.git waruqi/xmake
-  - cd ./waruqi/xmake
-  - sudo ./install
-  - cd -
+  - bash <(curl -fsSL https://raw.githubusercontent.com/tboox/xmake/master/scripts/get.sh)
   # - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 addons:
   apt:
