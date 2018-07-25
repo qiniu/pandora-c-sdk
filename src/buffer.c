@@ -1,7 +1,7 @@
-#include <pandora/buffer.h>
-
 #include <string.h>
 #include <stdlib.h>
+
+#include "pandora/buffer.h"
 
 static int buffer_grow(buffer_t *buffer, size_t min_capacity)
 {

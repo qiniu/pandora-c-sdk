@@ -1,4 +1,4 @@
-#include "pandora/pandora.h"
+#include "pandora/client.h"
 
 int main(void)
 {

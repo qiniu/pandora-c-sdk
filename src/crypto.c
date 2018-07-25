@@ -1,7 +1,7 @@
-#include "crypto.h"
-
 #include <apr_md5.h>
 #include <apr_sha1.h>
+
+#include "crypto.h"
 
 void hmac_sha1(unsigned char hmac[20], const unsigned char *key, int key_len,
                const unsigned char *message, int message_len)
