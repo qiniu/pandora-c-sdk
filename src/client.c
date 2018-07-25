@@ -477,7 +477,11 @@ do_write:
     }
 
     curl_slist_free_all(headers);
-    return code;
+    
+    if (code/100 == 2)
+        return PANDORAE_OK;
+    else
+        return PANDORAE_WRITE_FAILED;
 }
 
 pandora_error_t pandora_client_do_cache(s_pandora_client *client, s_write_context *ctx)
