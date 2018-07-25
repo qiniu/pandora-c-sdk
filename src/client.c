@@ -543,12 +543,12 @@ do_flush:
         if (fgets(buf, 128*1024, client->cache_control.oldpf) == NULL)
             break;
 
-        data_points_append_string(tmpdata, buf);
-        if (data_points_length(tmpdata) >= CLIENT_MAX_BODY_SIZE) {
+        if (data_points_length(tmpdata) + strlen(buf) > CLIENT_MAX_BODY_SIZE) {
             ctx.data = tmpdata;
             pandora_client_do_write(client, &ctx);
             data_points_clear(tmpdata);
         }
+        data_points_append_string(tmpdata, buf);
     }
 
     if (data_points_count(tmpdata) > 0) {
@@ -579,12 +579,12 @@ pandora_error_t do_write_from_file(s_pandora_client *client, FILE *fp, s_write_c
         if (fgets(buf, 128*1024, fp) == NULL)
             break;
 
-        data_points_append_string(tmpdata, buf);
-        if (data_points_length(tmpdata) >= CLIENT_MAX_BODY_SIZE) {
+        if (data_points_length(tmpdata) + strlen(buf) > CLIENT_MAX_BODY_SIZE) {
             ctx->data = tmpdata;
             pandora_client_do_write(client, ctx);
             data_points_clear(tmpdata);
         }
+        data_points_append_string(tmpdata, buf);
     }
 
     if (data_points_count(tmpdata) > 0) {
