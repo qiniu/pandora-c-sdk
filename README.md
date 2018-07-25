@@ -1,4 +1,4 @@
-# pandora-c
+# pandora-c-sdk
 
 ## 安装依赖库
 
@@ -24,14 +24,14 @@
 - ./configure --prefix=/usr/local/apr-util/ --with-apr=/usr/local/apr
 - make && make install
 
-## 安装pandora-c
-- git clone https://github.com/xingfeng2510/pandora-c.git
-- cd pandora-c
+## 安装pandora-c-sdk
+- git clone https://github.com/qiniu/pandora-c-sdk.git
+- cd pandora-c-sdk
 - cmake .
 - make && make install
 
-## 使用pandora-c（可参考示例代码sample/sample.c）
-- 引用头文件<pandora/pandora.h>
+## 使用pandora-c-sdk（可参考示例代码sample/sample.c）
+- 引用头文件<pandora/client.h>
 - 编译时加上-lpandora选项
 
 ## 示例代码
@@ -110,6 +110,12 @@
     // 7. 清理client实例
     pandora_client_cleanup(client);
 ```
+
+## 示例代码运行
+- cd sample
+- 填写sample.c文件中的ak、sk以及repo名称
+- make
+- ./sample
 
 ## 注意事项
 - client的创建、释放
