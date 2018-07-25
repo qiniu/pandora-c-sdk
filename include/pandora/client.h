@@ -66,8 +66,7 @@ pandora_error_t pandora_client_set_cache_policy(s_pandora_client *client, e_cach
  */
 void pandora_client_cleanup(s_pandora_client *client);
 
-typedef struct point_entry
-{
+typedef struct point_entry {
     struct curl_slist *fields;
 } s_point_entry;
 
@@ -82,8 +81,7 @@ pandora_error_t point_entry_append_float32(s_point_entry *pentry, const char *ke
 pandora_error_t point_entry_append_float64(s_point_entry *pentry, const char *key, double value);
 pandora_error_t point_entry_append_string(s_point_entry *pentry, const char *key, const char *value);
 
-typedef struct data_points
-{
+typedef struct data_points {
     buffer_t *buf;
     int point_count;
 } s_data_points;
