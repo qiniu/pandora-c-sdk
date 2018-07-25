@@ -11,7 +11,7 @@
 
 #define PANDORA_DEFAULT_HOST "https://nb-pipeline.qiniuapi.com"
 #define PANDORA_URL_MAX_SIZE 256
-#define PANDORA_C_USER_AGENT "pandora-c/1.0.1"
+#define PANDORA_C_USER_AGENT "pandora-c-sdk/1.0.1"
 
 #define CLIENT_MAX_BODY_SIZE 2*1024*1024
 
@@ -382,8 +382,9 @@ pandora_error_t pandora_client_set_cache_policy(s_pandora_client *client, e_cach
             return PANDORAE_NO_CACHE_DIR;
         }
         fprintf(stdout, "create cache directory %s automatically\n", cachedir);
+    } else {
+        closedir(dirp);
     }
-    closedir(dirp);
 
     client->cache_control.cachedir = cachedir;
 
