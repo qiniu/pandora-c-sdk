@@ -48,6 +48,9 @@ s_pandora_client *pandora_client_init(s_client_params *params)
     client->cache_control.oldpf = NULL;
     client->cache_control.start = UINT_MAX;
 
+    memset(client->cache_control.filename, 0, FILENAME_MAX);
+    memset(client->cache_control.oldfn, 0, FILENAME_MAX);
+
     pthread_mutex_init(&client->mutex, NULL);
 
     return client;
@@ -260,7 +263,7 @@ int pandora_client_curl(const char *url, struct curl_slist *headers, s_data_poin
 
     size_t data_len = data_points_length(data);
     if (data_len > 0) {
-        curl_easy_setopt(handle, CURLOPT_POSTFIELDSIZE, data_points_length(data));
+        curl_easy_setopt(handle, CURLOPT_POSTFIELDSIZE, data_len);
         curl_easy_setopt(handle, CURLOPT_POSTFIELDS, data_points_to_string(data));
     }
 
