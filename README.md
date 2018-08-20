@@ -36,7 +36,7 @@
 
 ## 示例代码
 ```
-// 1、设置client参数
+    // 1、设置client参数
     s_client_params params;
     params.pipeline_host = "https://nb-pipeline.qiniuapi.com"; // pipeline服务地址
     params.insight_host = "https://nb-insight.qiniuapi.com"; // insight服务地址
