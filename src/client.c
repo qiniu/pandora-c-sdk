@@ -3,13 +3,16 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <pandora/client.h>
 
 #include "pandora/buffer.h"
 #include "pandora/client.h"
 #include "crypto.h"
 #include "utils.h"
+#include "cJSON.h"
 
-#define PANDORA_DEFAULT_HOST "https://nb-pipeline.qiniuapi.com"
+#define PANDORA_DEFAULT_PIPELINE_HOST "https://nb-pipeline.qiniuapi.com"
+#define PANDORA_DEFAULT_INSIGHT_HOST "https://nb-insight.qiniuapi.com"
 #define PANDORA_URL_MAX_SIZE 256
 #define PANDORA_C_USER_AGENT "pandora-c-sdk/1.0.1"
 
@@ -31,10 +34,14 @@ s_pandora_client *pandora_client_init(s_client_params *params)
         return NULL;
     }
 
-    if (params->host)
-        client->params.host = pandora_strdup(params->host);
+    if (params->pipeline_host)
+        client->params.pipeline_host = pandora_strdup(params->pipeline_host);
     else
-        client->params.host = pandora_strdup(PANDORA_DEFAULT_HOST);
+        client->params.pipeline_host = pandora_strdup(PANDORA_DEFAULT_PIPELINE_HOST);
+    if (params->insight_host)
+        client->params.insight_host = pandora_strdup(PANDORA_DEFAULT_INSIGHT_HOST);
+    else
+        client->params.insight_host = pandora_strdup(params->insight_host);
     client->params.access_key = pandora_strdup(params->access_key);
     client->params.secret_key = pandora_strdup(params->secret_key);
     client->params.fail_retry = params->fail_retry;
@@ -81,7 +88,8 @@ void pandora_client_cleanup(s_pandora_client *client)
 
         pthread_mutex_destroy(&client->mutex);
 
-        free(client->params.host);
+        free(client->params.pipeline_host);
+        free(client->params.insight_host);
         free(client->params.access_key);
         free(client->params.secret_key);
         free(client);
@@ -253,7 +261,31 @@ int data_points_count(s_data_points *data)
     return data->point_count;
 }
 
-int pandora_client_curl(const char *url, struct curl_slist *headers, s_data_points *data)
+typedef struct {
+    char *memory;
+    size_t size;
+} memory_t;
+
+static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+    size_t realsize = size * nmemb;
+    memory_t *mem = (memory_t *)userp;
+
+    mem->memory = realloc(mem->memory, mem->size + realsize + 1);
+    if(mem->memory == NULL) {
+        /* out of memory! */
+        printf("not enough memory (realloc returned NULL)\n");
+        return 0;
+    }
+
+    memcpy(&(mem->memory[mem->size]), contents, realsize);
+    mem->size += realsize;
+    mem->memory[mem->size] = 0;
+
+    return realsize;
+}
+
+int pandora_client_curl(const char *url, struct curl_slist *headers, char *data, size_t len, char **response)
 {
     CURLcode c;
     CURL *handle = curl_easy_init();
@@ -261,10 +293,16 @@ int pandora_client_curl(const char *url, struct curl_slist *headers, s_data_poin
     curl_easy_setopt(handle, CURLOPT_URL, url);
     curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
 
-    size_t data_len = data_points_length(data);
-    if (data_len > 0) {
-        curl_easy_setopt(handle, CURLOPT_POSTFIELDSIZE, data_len);
-        curl_easy_setopt(handle, CURLOPT_POSTFIELDS, data_points_to_string(data));
+    memory_t chunk;
+    chunk.memory = malloc(1);
+    chunk.size = 0;
+
+    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(handle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+    if (len > 0) {
+        curl_easy_setopt(handle, CURLOPT_POSTFIELDSIZE, len);
+        curl_easy_setopt(handle, CURLOPT_POSTFIELDS, data);
     }
 
     c = curl_easy_perform(handle);
@@ -273,20 +311,25 @@ int pandora_client_curl(const char *url, struct curl_slist *headers, s_data_poin
         if (curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &status_code) == CURLE_OK)
             c = status_code;
     }
+    if (response != NULL) {
+        *response = chunk.memory;
+    } else {
+        free(chunk.memory);
+    }
 
     curl_easy_cleanup(handle);
 
     return c;
 }
 
-void add_request_headers(s_pandora_client *client, const char *repo, struct curl_slist **headers)
+void add_request_headers(s_pandora_client *client, const char *uri, struct curl_slist **headers)
 {
     char date[36];
     char signstr[128];
 
     char *pmt = current_gmt();
     snprintf(date, 36, "Date: %s", pmt);
-    snprintf(signstr, 128, "POST\n\ntext/plain\n%s\n/v2/repos/%s/data", pmt, repo);
+    snprintf(signstr, 128, "POST\n\ntext/plain\n%s\n%s", pmt, uri);
     free(pmt);
 
     unsigned char hmac[20];
@@ -437,6 +480,7 @@ int cache_control_need_flush(s_cache_control *ctl, size_t delta)
 
 typedef struct write_context {
     const char *url;
+    const char *uri;
     const char *repo;
     s_data_points *data;
 } s_write_context;
@@ -463,8 +507,8 @@ pandora_error_t pandora_client_do_write(s_pandora_client *client, s_write_contex
     struct curl_slist *headers = NULL;
 
 do_write:
-    add_request_headers(client, ctx->repo, &headers);
-    int code = pandora_client_curl(ctx->url, headers, ctx->data);
+    add_request_headers(client, ctx->uri, &headers);
+    int code = pandora_client_curl(ctx->url, headers, data_points_to_string(ctx->data), data_points_length(ctx->data), NULL);
     if (do_write_should_retry(code)) {
         curl_slist_free_all(headers);
         headers = NULL;
@@ -513,10 +557,13 @@ pandora_error_t pandora_client_write(s_pandora_client *client, const char *repo,
 
     int status;
     char url[PANDORA_URL_MAX_SIZE];
-    snprintf(url, PANDORA_URL_MAX_SIZE, "%s/v2/repos/%s/data", client->params.host, repo);
+    snprintf(url, PANDORA_URL_MAX_SIZE, "%s/v2/repos/%s/data", client->params.pipeline_host, repo);
+    char uri[PANDORA_URL_MAX_SIZE];
+    snprintf(uri, PANDORA_URL_MAX_SIZE, "/v2/repos/%s/data", repo);
 
     s_write_context ctx = {
-        .url= url,
+        .url = url,
+        .uri = uri,
         .repo = repo,
         .data = data,
     };
@@ -613,7 +660,7 @@ pandora_error_t pandora_client_write_cached(s_pandora_client *client, const char
 
     int status;
     char url[PANDORA_URL_MAX_SIZE];
-    snprintf(url, PANDORA_URL_MAX_SIZE, "%s/v2/repos/%s/data", client->params.host, repo);
+    snprintf(url, PANDORA_URL_MAX_SIZE, "%s/v2/repos/%s/data", client->params.pipeline_host, repo);
 
     struct dirent *direntp;
     while ((direntp = readdir(dirp)) != NULL) {
@@ -658,4 +705,38 @@ pandora_error_t pandora_client_write_cached(s_pandora_client *client, const char
     closedir(dirp);
 
     return PANDORAE_OK;
+}
+
+pandora_error_t pandora_client_insight_search(s_pandora_client *client, const char *repo, s_search_params *params, char **result)
+{
+    struct curl_slist *headers = NULL;
+
+    int status;
+    char url[PANDORA_URL_MAX_SIZE];
+    snprintf(url, PANDORA_URL_MAX_SIZE, "%s/v5/repos/%s/search", client->params.insight_host, repo);
+    char uri[PANDORA_URL_MAX_SIZE];
+    snprintf(uri, PANDORA_URL_MAX_SIZE, "/v5/repos/%s/search", repo);
+
+    cJSON *root = cJSON_CreateObject();
+    if (params->query)
+        cJSON_AddStringToObject(root, "query", params->query);
+    if (params->sort)
+        cJSON_AddStringToObject(root, "sort", params->sort);
+    if (params->fields)
+        cJSON_AddStringToObject(root, "fields", params->fields);
+    cJSON_AddNumberToObject(root, "size", params->size);
+    cJSON_AddNumberToObject(root, "from", params->from);
+    char *data = cJSON_Print(root);
+
+    add_request_headers(client, uri, &headers);
+    status = pandora_client_curl(url, headers, data, strlen(data), result);
+
+    curl_slist_free_all(headers);
+    cJSON_Delete(root);
+    free(data);
+
+    if (status/100 == 2)
+        return PANDORAE_OK;
+    else
+        return PANDORAE_FAILED_QUERY;
 }

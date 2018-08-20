@@ -17,7 +17,8 @@ extern "C" {
 #define FALSE 0
 
 typedef struct client_params {
-    char *host;
+    char *pipeline_host;
+    char *insight_host;
     char *access_key;
     char *secret_key;
     int fail_retry;
@@ -101,6 +102,19 @@ pandora_error_t pandora_client_write(s_pandora_client *client, const char *repo,
  * Write data points from all cache files under given cache directory
  */
 pandora_error_t pandora_client_write_cached(s_pandora_client *client, const char *repo, const char *cachedir);
+
+typedef struct search_params {
+    char *query;
+    char *sort;
+    char *fields;
+    int size;
+    int from;
+} s_search_params;
+
+/**
+ * Search logs from pandora insight with given parameters.
+ */
+pandora_error_t pandora_client_insight_search(s_pandora_client *client, const char *repo, s_search_params *params, char **result);
 
 #ifdef __cplusplus
 }

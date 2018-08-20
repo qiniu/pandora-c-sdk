@@ -24,6 +24,8 @@ typedef enum {
     PANDORAE_REQUEST_TIMEOUT,
     PANDORAE_WRITE_FAILED,
     PANDORAE_CONNECTION_FAILED,
+
+    PANDORAE_FAILED_QUERY,
 } pandora_error_t;
 
 #ifdef __cplusplus
