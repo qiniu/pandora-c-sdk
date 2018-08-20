@@ -505,13 +505,17 @@ pandora_error_t pandora_client_do_write(s_pandora_client *client, s_write_contex
 {
     int retry = 0;
     struct curl_slist *headers = NULL;
+    char *result = NULL;
 
 do_write:
     add_request_headers(client, ctx->uri, &headers);
-    int code = pandora_client_curl(ctx->url, headers, data_points_to_string(ctx->data), data_points_length(ctx->data), NULL);
+    int code = pandora_client_curl(ctx->url, headers, data_points_to_string(ctx->data), data_points_length(ctx->data), &result);
     if (do_write_should_retry(code)) {
         curl_slist_free_all(headers);
         headers = NULL;
+
+        free(result);
+        result = NULL;
 
         if (++retry < client->params.fail_retry) {
             fprintf(stderr, "write failed after %d retry: %s", retry, curl_easy_strerror(code));
@@ -527,8 +531,12 @@ do_write:
     
     if (code/100 == 2)
         return PANDORAE_OK;
-    else
+    else {
+        fprintf(stderr, "write failed: %s\n", result);
+        free(result);
+        result = NULL;
         return PANDORAE_WRITE_FAILED;
+    }
 }
 
 pandora_error_t pandora_client_do_cache(s_pandora_client *client, s_write_context *ctx)
