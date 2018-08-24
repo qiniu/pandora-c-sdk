@@ -8,16 +8,6 @@ else()
     message(FATAL_ERROR "Could not found CURL library")
 endif()
 
-find_package(APR REQUIRED)
-if(APR_FOUND)
-    include_directories(${APR_INCLUDE_DIR})
-    link_libraries(${APR_LIBRARY})
-    include_directories(${APRUTIL_INCLUDE_DIR})
-    link_libraries(${APRUTIL_LIBRARY})
-else()
-    message(FATAL_ERROR "Could not found APR library")
-endif()
-
 set(LIBRARY_NAME pandora)
 set(LIBRARY_STATIC_NAME pandora_static)
 set(LIBRARY_SHARED_NAME pandora_shared)
@@ -26,10 +16,10 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 aux_source_directory(. LIB_CFILES)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_library(${LIBRARY_STATIC_NAME} STATIC ${LIB_CFILES} ${CRYPTO_FILES})
+add_library(${LIBRARY_STATIC_NAME} STATIC ${LIB_CFILES})
 set_target_properties(${LIBRARY_STATIC_NAME} PROPERTIES OUTPUT_NAME ${LIBRARY_NAME}
         CLEAN_DIRECT_OUTPUT 1)
-add_library(${LIBRARY_SHARED_NAME} SHARED ${LIB_CFILES} ${CRYPTO_FILES})
+add_library(${LIBRARY_SHARED_NAME} SHARED ${LIB_CFILES})
 set_target_properties(${LIBRARY_SHARED_NAME} PROPERTIES OUTPUT_NAME ${LIBRARY_NAME}
         CLEAN_DIRECT_OUTPUT 1)
 

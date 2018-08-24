@@ -9,21 +9,6 @@
 - ./configure --prefix=/usr/local/curl
 - make && make install
 
-### apr
-- wget https://archive.apache.org/dist/apr/apr-1.5.2.tar.gz
-- tar zxvf apr-1.5.3.tar.gz
-- cd apr-1.5.2
-- ./configure --prefix=/usr/local/apr
-- make && make install
-
-### apr-util
-- apt-get install libexpat1
-- wget https://archive.apache.org/dist/apr/apr-util-1.5.4.tar.gz
-- tar zxvf apr-util-1.5.5.tar.gz
-- cd apr-util-1.5.4
-- ./configure --prefix=/usr/local/apr-util/ --with-apr=/usr/local/apr
-- make && make install
-
 ## 安装pandora-c-sdk
 - git clone https://github.com/qiniu/pandora-c-sdk.git
 - cd pandora-c-sdk
