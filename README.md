@@ -1,25 +1,31 @@
 # pandora-c-sdk
 
-## 安装依赖库
+## Windows平台
 
-### libcur
+请参考：[SDK-win32](https://github.com/qiniu/pandora-c-sdk/blob/master/win32/README.md)
+
+## Linux、Mac平台
+
+### 安装依赖库
+
+#### libcur
 - wget https://curl.haxx.se/download/curl-7.61.0.tar.gz
 - tar zxvf curl-7.61.0.tar.gz
 - cd curl-7.61.0
 - ./configure --prefix=/usr/local
 - make && make install
 
-## 安装pandora-c-sdk
+### 安装pandora-c-sdk
 - git clone https://github.com/qiniu/pandora-c-sdk.git
 - cd pandora-c-sdk
 - cmake .
 - make && make install
 
-## 使用pandora-c-sdk（可参考示例代码sample/sample.c）
+### 使用pandora-c-sdk（可参考示例代码sample/sample.c）
 - 引用头文件<pandora/client.h>
 - 编译时加上-lpandora选项
 
-## 示例代码
+### 示例代码
 ```
     // 1、设置client参数
     s_client_params params;
@@ -82,13 +88,13 @@
     pandora_client_cleanup(client);
 ```
 
-## 示例代码运行
+### 示例代码运行
 - cd sample
 - 填写sample.c文件中的ak、sk以及repo名称
 - make
 - ./sample
 
-## 注意事项
+### 注意事项
 - client的创建、释放
 ```
 s_pandora_client *client = pandora_client_init(&params)
