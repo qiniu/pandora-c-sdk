@@ -2,7 +2,7 @@
 
 ## Windows平台
 
-请参考：[SDK-win32](https://github.com/qiniu/pandora-c-sdk/blob/master/win32/README.md)
+请参考：[SDK-win32](https://github.com/qiniu/pandora-c-sdk/blob/master/win32/)
 
 ## Linux、Mac平台
 
