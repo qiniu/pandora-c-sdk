@@ -8,12 +8,7 @@
 
 ### 安装依赖库
 
-#### libcur
-- wget https://curl.haxx.se/download/curl-7.61.0.tar.gz
-- tar zxvf curl-7.61.0.tar.gz
-- cd curl-7.61.0
-- ./configure --prefix=/usr/local
-- make && make install
+- libcurl
 
 ### 安装pandora-c-sdk
 - git clone https://github.com/qiniu/pandora-c-sdk.git
