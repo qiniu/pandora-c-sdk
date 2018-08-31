@@ -3,7 +3,6 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <pandora/client.h>
 
 #include "pandora/buffer.h"
 #include "pandora/client.h"
@@ -20,6 +19,9 @@
 
 #define DATA_BUFFER_SIZE 4096
 #define AUTH_BUFFER_SIZE 256
+
+#define TRUE 1
+#define FALSE 0
 
 s_pandora_client *pandora_client_init(s_client_params *params)
 {

@@ -13,9 +13,6 @@ extern "C" {
 #include "buffer.h"
 #include "error.h"
 
-#define TRUE 1
-#define FALSE 0
-
 typedef struct client_params {
     char *pipeline_host;
     char *insight_host;
