@@ -480,7 +480,7 @@ int cache_control_need_flush(s_cache_control *ctl, size_t delta)
     return FALSE;
 }
 
-typedef struct write_context {
+typedef struct {
     const char *url;
     const char *uri;
     const char *repo;

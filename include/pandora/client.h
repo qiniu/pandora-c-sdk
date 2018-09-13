@@ -13,7 +13,7 @@ extern "C" {
 #include "buffer.h"
 #include "error.h"
 
-typedef struct client_params {
+typedef struct {
     char *pipeline_host;
     char *insight_host;
     char *access_key;
@@ -27,7 +27,7 @@ typedef enum {
     CACHE_BY_TIME,
 } e_cache_policy;
 
-typedef struct cache_control {
+typedef struct {
     int initialized;
 
     e_cache_policy policy;
@@ -43,7 +43,7 @@ typedef struct cache_control {
     unsigned int start;
 } s_cache_control;
 
-typedef struct pandora_client {
+typedef struct {
     pthread_mutex_t mutex;
     s_client_params params;
     s_cache_control cache_control;
@@ -64,7 +64,7 @@ pandora_error_t pandora_client_set_cache_policy(s_pandora_client *client, e_cach
  */
 void pandora_client_cleanup(s_pandora_client *client);
 
-typedef struct point_entry {
+typedef struct {
     struct curl_slist *fields;
 } s_point_entry;
 
@@ -79,7 +79,7 @@ pandora_error_t point_entry_append_float32(s_point_entry *pentry, const char *ke
 pandora_error_t point_entry_append_float64(s_point_entry *pentry, const char *key, double value);
 pandora_error_t point_entry_append_string(s_point_entry *pentry, const char *key, const char *value);
 
-typedef struct data_points {
+typedef struct {
     buffer_t *buf;
     int point_count;
 } s_data_points;
@@ -100,7 +100,7 @@ pandora_error_t pandora_client_write(s_pandora_client *client, const char *repo,
  */
 pandora_error_t pandora_client_write_cached(s_pandora_client *client, const char *repo, const char *cachedir);
 
-typedef struct search_params {
+typedef struct {
     char *query;
     char *sort;
     char *fields;
